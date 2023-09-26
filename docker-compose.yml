@@ -21,11 +21,14 @@ services:
 
     couchserver:
         image: couchdb:3.1.2
+        container_name: couchdb
         ports:
             - "5984:5984"
+        env_file: .env
         environment:
             - COUCHDB_USER=${COUCHDB_USER}
             - COUCHDB_PASSWORD=${COUCHDB_PW}
+            - COUCHDB_SECRET_PATH=${COUCHDB_SECRET_PATH}
         volumes:
             # The files' owner will be id:5984 when you launch the image.
             # Because CouchDB writes on-the-fly configurations into local.ini.
@@ -42,7 +45,7 @@ services:
             caddy.handle_path: /*
             caddy.handle_path.0_respond: "\"\" 403"
             caddy.handle_path.0_header.-Server: ""
-            caddy.handle_path_1: /e=_/* 
+            caddy.handle_path_1: /${COUCHDB_SECRET_PATH}/*
             caddy.handle_path_1.0_reverse_proxy: "{{upstreams 5984}}"
         restart: always
 
